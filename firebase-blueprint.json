@@ -1,0 +1,229 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Herbal formulation or botanical product in the Envirve catalog",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "sku": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "compareAtPrice": { "type": "number" },
+        "shortDesc": { "type": "string" },
+        "description": { "type": "string" },
+        "images": { "type": "array" },
+        "badge": { "type": "string" },
+        "rating": { "type": "number" },
+        "reviewsCount": { "type": "number" },
+        "stock": { "type": "number" },
+        "lowStockThreshold": { "type": "number" },
+        "isFeatured": { "type": "boolean" },
+        "isBestseller": { "type": "boolean" },
+        "isNewArrival": { "type": "boolean" },
+        "isPublished": { "type": "boolean" },
+        "volumeSize": { "type": "string" },
+        "ingredients": { "type": "array" },
+        "benefits": { "type": "array" },
+        "howToUse": { "type": "string" },
+        "suitableFor": { "type": "string" }
+      },
+      "required": ["name", "price", "stock", "category"]
+    },
+    "Ingredient": {
+      "title": "Ingredient",
+      "description": "Botanical herb, wild fruit, or cold-pressed seed in the encyclopedia",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "botanicalName": { "type": "string" },
+        "origin": { "type": "string" },
+        "image": { "type": "string" },
+        "description": { "type": "string" },
+        "benefits": { "type": "array" },
+        "featuredInProductIds": { "type": "array" }
+      },
+      "required": ["name", "description", "origin"]
+    },
+    "BlogPost": {
+      "title": "BlogPost",
+      "description": "Journal story, hair ritual guide, or editorial article",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "slug": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "content": { "type": "string" },
+        "category": { "type": "string" },
+        "readTime": { "type": "string" },
+        "date": { "type": "string" },
+        "author": { "type": "string" },
+        "image": { "type": "string" },
+        "isPublished": { "type": "boolean" }
+      },
+      "required": ["title", "content", "category"]
+    },
+    "Coupon": {
+      "title": "Coupon",
+      "description": "Promotional discount code",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "code": { "type": "string" },
+        "type": { "type": "string" },
+        "value": { "type": "number" },
+        "minOrder": { "type": "number" },
+        "expiresAt": { "type": "string" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["code", "type", "value"]
+    },
+    "InstagramPost": {
+      "title": "InstagramPost",
+      "description": "Botanical studio journal feed item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "caption": { "type": "string" },
+        "likes": { "type": "number" },
+        "url": { "type": "string" }
+      },
+      "required": ["imageUrl", "caption"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer order placed in the store",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "date": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "shippingAddress": { "type": "string" },
+        "city": { "type": "string" },
+        "postalCode": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "deliveryFee": { "type": "number" },
+        "discountAmount": { "type": "number" },
+        "total": { "type": "number" },
+        "status": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "paymentStatus": { "type": "string" },
+        "transactionRef": { "type": "string" },
+        "trackingNumber": { "type": "string" },
+        "courierName": { "type": "string" },
+        "notes": { "type": "string" },
+        "emailNotificationSent": { "type": "boolean" },
+        "emailSentAt": { "type": "string" }
+      },
+      "required": ["orderNumber", "customerName", "customerPhone", "shippingAddress", "total"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Customer experience and community voice review",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "productId": { "type": "string" },
+        "productName": { "type": "string" },
+        "authorName": { "type": "string" },
+        "rating": { "type": "number" },
+        "date": { "type": "string" },
+        "comment": { "type": "string" },
+        "verifiedPurchase": { "type": "boolean" },
+        "isApproved": { "type": "boolean" },
+        "featuredOnHome": { "type": "boolean" }
+      },
+      "required": ["authorName", "comment", "rating"]
+    },
+    "SiteSettings": {
+      "title": "SiteSettings",
+      "description": "Configuration settings for Envirve Naturals",
+      "type": "object",
+      "properties": {
+        "brandName": { "type": "string" },
+        "slogan": { "type": "string" },
+        "logoImageUrl": { "type": "string" },
+        "announcementBar": { "type": "object" },
+        "currency": { "type": "string" },
+        "currencySymbol": { "type": "string" },
+        "freeShippingThreshold": { "type": "number" },
+        "defaultDeliveryFee": { "type": "number" },
+        "contactEmail": { "type": "string" },
+        "contactPhone": { "type": "string" },
+        "whatsappNumber": { "type": "string" },
+        "instagramHandle": { "type": "string" },
+        "instagramUrl": { "type": "string" },
+        "facebookUrl": { "type": "string" },
+        "adminPasswordHash": { "type": "string" }
+      }
+    },
+    "HeroConfig": {
+      "title": "HeroConfig",
+      "description": "Cinematic hero video and copy settings",
+      "type": "object",
+      "properties": {
+        "videoUrl": { "type": "string" },
+        "useVideo": { "type": "boolean" },
+        "fallbackImageUrl": { "type": "string" },
+        "heading": { "type": "string" },
+        "subheading": { "type": "string" },
+        "slogan": { "type": "string" },
+        "ctaText": { "type": "string" },
+        "ctaLink": { "type": "string" },
+        "secondaryCtaText": { "type": "string" },
+        "secondaryCtaLink": { "type": "string" },
+        "overlayOpacity": { "type": "number" },
+        "autoplay": { "type": "boolean" },
+        "loop": { "type": "boolean" },
+        "muted": { "type": "boolean" }
+      }
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Collection of botanical formulations and herbal products"
+    },
+    "/ingredients/{ingredientId}": {
+      "schema": "Ingredient",
+      "description": "Collection of botanical ingredients in the encyclopedia"
+    },
+    "/blogPosts/{postId}": {
+      "schema": "BlogPost",
+      "description": "Collection of ritual stories and journal articles"
+    },
+    "/coupons/{couponId}": {
+      "schema": "Coupon",
+      "description": "Collection of discount coupons"
+    },
+    "/instagramPosts/{postId}": {
+      "schema": "InstagramPost",
+      "description": "Collection of botanical studio visual posts"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Collection of orders placed by customers"
+    },
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Collection of community voices and customer reviews"
+    },
+    "/settings/{settingId}": {
+      "schema": "SiteSettings",
+      "description": "Store configuration and brand settings"
+    },
+    "/heroConfig/{configId}": {
+      "schema": "HeroConfig",
+      "description": "Hero section streaming video and presentation controls"
+    }
+  }
+}

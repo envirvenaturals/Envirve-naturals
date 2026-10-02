@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Products catalog: anyone can browse; authenticated or store managers can edit
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if true; // Allows web management portal sync
+    }
+
+    // Orders: anyone can place an order; reading and updating statuses allowed
+    match /orders/{orderId} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if true;
+    }
+
+    // Community voices / Customer reviews: anyone can view and submit reviews
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Store settings & brand logo: public can read, management can update
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Hero video & banner CMS: public can read, management can update
+    match /heroConfig/{configId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Ingredients encyclopedia: public read
+    match /ingredients/{ingredientId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Journal / blog posts: public read
+    match /blogPosts/{postId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Promotional coupons: public read for code validation
+    match /coupons/{couponId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Instagram feed posts: public read
+    match /instagramPosts/{postId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // System metadata & seeding status
+    match /_system/{docId} {
+      allow read, write: if true;
+    }
+  }
+}

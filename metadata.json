@@ -1,0 +1,6 @@
+{
+  "name": "Envirve Naturals",
+  "description": "Premium herbal, natural, and organic personal care crafted with nature-led botanicals. Shampoos, oils, skincare, and everyday rituals for your wellness.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
