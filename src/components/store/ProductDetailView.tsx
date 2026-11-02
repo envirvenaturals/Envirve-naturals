@@ -38,14 +38,13 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     showToast,
   } = useStore();
 
-  const [selectedImage, setSelectedImage] = useState(product.images[0] || '');
+  const productImage = product.images && product.images[0] ? product.images[0].trim() : '';
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState<string | null>('ingredients');
 
   React.useEffect(() => {
-    setSelectedImage(product.images[0] || '');
     setQuantity(1);
-  }, [product.id, product.images]);
+  }, [product.id]);
 
   // Review form
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -97,55 +96,44 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   };
 
   return (
-    <div className="bg-[#FAF9F5] min-h-screen py-10 transition-colors">
+    <div className="bg-[#FAF9F5] min-h-screen py-6 sm:py-10 transition-colors pb-24 sm:pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Link */}
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#4A5E46] hover:text-[#1F3D1C] transition-colors mb-8 group"
+          className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#4A5E46] hover:text-[#1F3D1C] transition-colors mb-6 sm:mb-8 group"
         >
           <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
           <span>Return to Collection</span>
         </button>
 
-        {/* Main Grid: Gallery Left, Purchase Module Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start pb-16 border-b border-[#ECE7DC]">
-          {/* Gallery Column (lg: 7 cols) */}
+        {/* Main Grid: Single Product Picture Left, Purchase Module Right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start pb-16 border-b border-[#ECE7DC]">
+          {/* Picture Column (Only the single uploaded picture is rendered) */}
           <div className="lg:col-span-7 flex flex-col gap-4">
             <div className="relative aspect-square sm:aspect-[4/3] w-full bg-[#F3EFE7] rounded-2xl overflow-hidden border border-[#E8E2D5] shadow-xs flex items-center justify-center">
-              <img
-                src={selectedImage || product.images[0]}
-                alt={product.name}
-                className="w-full h-full object-cover object-center"
-              />
+              {productImage ? (
+                <img
+                  src={productImage}
+                  alt={product.name}
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-[#F2EFE8] text-[#2D5A27]/70 p-6 text-center">
+                  <Leaf className="w-12 h-12 mb-2 stroke-1 text-[#2D5A27]" />
+                  <span className="font-serif text-base font-medium text-[#1E381A]">{product.name}</span>
+                  <span className="text-xs text-[#6F7C6C] uppercase tracking-widest mt-1">Envirve Naturals Formulation</span>
+                </div>
+              )}
               {product.badge && (
-                <span className="absolute top-4 left-4 bg-[#1C3619] text-white text-[10px] tracking-[0.2em] uppercase font-semibold px-3 py-1 rounded">
+                <span className="absolute top-4 left-4 bg-[#1C3619] text-white text-[10px] tracking-[0.2em] uppercase font-semibold px-3 py-1 rounded shadow-xs">
                   {product.badge}
                 </span>
               )}
             </div>
 
-            {/* Thumbnails if multiple */}
-            {product.images.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-2">
-                {product.images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImage(img)}
-                    className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
-                      selectedImage === img
-                        ? 'border-[#2D5A27] shadow-sm'
-                        : 'border-[#E2DDCF] opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-
             {/* Botanical Trust Callout */}
-            <div className="p-4 bg-white rounded-xl border border-[#ECE7DA] mt-4 flex items-center gap-4 text-xs text-[#52634E]">
+            <div className="p-4 bg-white rounded-xl border border-[#ECE7DA] flex items-center gap-4 text-xs text-[#52634E]">
               <div className="w-10 h-10 rounded-full bg-[#EEF5EC] text-[#2D5A27] flex items-center justify-center flex-shrink-0">
                 <Leaf className="w-5 h-5" />
               </div>
@@ -565,6 +553,31 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             </div>
           </div>
         )}
+      </div>
+
+      {/* Mobile Sticky Quick-Action Bar */}
+      <div className="sm:hidden fixed bottom-14 left-0 right-0 z-30 bg-[#FAF9F5]/98 backdrop-blur-md px-4 py-2.5 border-t border-[#ECE7DC] shadow-lg flex items-center justify-between gap-3">
+        <div>
+          <span className="text-[10px] text-[#71826E] uppercase tracking-wider block">Price</span>
+          <span className="font-mono font-bold text-base text-[#183115]">
+            {siteSettings.currencySymbol} {product.price * quantity}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleAddToCart}
+            className="py-2.5 px-4 bg-[#1C3619] active:bg-[#284E24] text-white text-xs uppercase tracking-wider font-semibold rounded-lg shadow-sm flex items-center gap-1.5"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add</span>
+          </button>
+          <button
+            onClick={handleBuyNow}
+            className="py-2.5 px-4 bg-[#2D5A27] active:bg-[#1E4119] text-white text-xs uppercase tracking-wider font-semibold rounded-lg shadow-sm"
+          >
+            Buy Now
+          </button>
+        </div>
       </div>
     </div>
   );

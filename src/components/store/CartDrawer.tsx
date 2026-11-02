@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { X, Trash2, Plus, Minus, ArrowRight, ShieldCheck, Tag } from 'lucide-react';
+import { X, Trash2, Plus, Minus, ArrowRight, ShieldCheck, Tag, Sprout } from 'lucide-react';
 
 interface CartDrawerProps {
   onCheckout: () => void;
@@ -136,11 +136,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onCheckout }) => {
                   key={item.product.id}
                   className="flex gap-4 p-3 bg-white rounded-lg border border-[#EDE8DC] shadow-xs"
                 >
-                  <img
-                    src={item.product.images[0]}
-                    alt={item.product.name}
-                    className="w-18 h-18 object-cover rounded bg-[#F5F2EB] flex-shrink-0"
-                  />
+                  {item.product.images && item.product.images[0] ? (
+                    <img
+                      src={item.product.images[0]}
+                      alt={item.product.name}
+                      className="w-18 h-18 object-cover rounded bg-[#F5F2EB] flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-18 h-18 rounded bg-[#F0EBE0] flex items-center justify-center flex-shrink-0 text-[#2D5A27]">
+                      <Sprout className="w-6 h-6 stroke-1" />
+                    </div>
+                  )}
                   <div className="flex-1 flex flex-col justify-between">
                     <div className="flex justify-between items-start gap-2">
                       <div>

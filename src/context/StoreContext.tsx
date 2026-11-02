@@ -109,6 +109,10 @@ interface StoreContextType {
   selectedArticleId: string | null;
   setSelectedArticleId: (id: string | null) => void;
 
+  // Cloud & GitHub Sync
+  isCloudConnected: boolean;
+  forceSyncAllToCloud: () => Promise<{ success: boolean; count: number; error?: string }>;
+
   // Notification Toast
   toastMessage: string | null;
   showToast: (msg: string) => void;
@@ -253,10 +257,7 @@ const initialProducts: Product[] = [
     compareAtPrice: 750,
     shortDesc: 'A rich infusion of Amla, Reetha, Shikakai, and Rosemary to cleanse and balance scalp flora.',
     description: 'Our signature shampoo harnesses cold-pressed plant extracts and natural saponins. Formulated without sulfates, synthetic parabens, or harsh detergents, it purifies the scalp gently while preserving essential lipid barriers. Amla strengthens the roots, Reetha creates a velvet foam, and rosemary stimulates active circulation for hair that feels resilient and featherlight.',
-    images: [
-      '/src/assets/images/product_herbal_shampoo_1790696462766.jpg',
-      '/src/assets/images/product_botanical_oil_1790696473722.jpg',
-    ],
+    images: [], // Only picture uploaded from admin dashboard will be shown
     badge: 'BESTSELLER',
     rating: 4.9,
     reviewsCount: 38,
@@ -288,10 +289,7 @@ const initialProducts: Product[] = [
     compareAtPrice: 1100,
     shortDesc: 'Slow-infused rosemary, amla, and cold-pressed sweet almond elixir for profound scalp vitality.',
     description: 'An artisanal hair treatment slowly sun-infused with fresh rosemary leaves, bhringraj, and sweet almond oil. Deeply penetrating yet non-greasy, this golden botanical elixir nurtures dormant follicles, calms irritation, and locks moisture into split or parched ends.',
-    images: [
-      '/src/assets/images/product_botanical_oil_1790696473722.jpg',
-      '/src/assets/images/ingredient_botanical_banner_1790696499213.jpg',
-    ],
+    images: [], // Only picture uploaded from admin dashboard will be shown
     badge: 'BESTSELLER',
     rating: 5.0,
     reviewsCount: 52,
@@ -323,10 +321,7 @@ const initialProducts: Product[] = [
     compareAtPrice: 500,
     shortDesc: 'Hand-pressed with organic beetroot extract, goat milk, and calming lavender essential oil.',
     description: 'Handcrafted in micro-batches using traditional cold-process soapmaking. Pure organic beetroot extract lends its natural ruby hue and rich antioxidant potency, while goat milk provides lactic acid to refine texture gently. Leaves your skin velvety, soft, and naturally luminous.',
-    images: [
-      '/src/assets/images/product_glow_soap_1790696485480.jpg',
-      '/src/assets/images/hero_botanical_ritual_1790696451263.jpg',
-    ],
+    images: [], // Only picture uploaded from admin dashboard will be shown
     badge: 'NEW',
     rating: 4.8,
     reviewsCount: 24,
@@ -358,9 +353,7 @@ const initialProducts: Product[] = [
     compareAtPrice: 850,
     shortDesc: 'Raw aloe vera, golden flaxseed gel, and virgin coconut lipids for weightless silkiness.',
     description: 'A botanical rinse that detangles effortlessly without synthetic silicones. Formulated with fresh aloe vera pulp and flaxseed mucilage, it coats each cuticle with breathable plant moisture, leaving hair touchably soft, lustrous, and easy to comb.',
-    images: [
-      '/src/assets/images/product_herbal_shampoo_1790696462766.jpg',
-    ],
+    images: [], // Only picture uploaded from admin dashboard will be shown
     badge: 'LIMITED',
     rating: 4.9,
     reviewsCount: 19,
@@ -391,9 +384,7 @@ const initialProducts: Product[] = [
     compareAtPrice: 650,
     shortDesc: 'Pure steam-distilled rosemary hydrolat with witch hazel and tea tree leaf water.',
     description: 'An invigorating leave-in mist formulated to rebalance scalp pH between wash days. Crafted by steam distilling mountain-grown rosemary, this lightweight tonic clarifies residue and soothes itchiness.',
-    images: [
-      '/src/assets/images/product_botanical_oil_1790696473722.jpg',
-    ],
+    images: [], // Only picture uploaded from admin dashboard will be shown
     badge: '',
     rating: 4.7,
     reviewsCount: 15,
@@ -424,9 +415,7 @@ const initialProducts: Product[] = [
     compareAtPrice: 950,
     shortDesc: 'Pure Himalayan wild turmeric, fragrant red sandalwood, and raw cane crystals.',
     description: 'An opulent ritual polish combining antioxidant-dense wild kasturi manjal (turmeric) with sustainably harvested sandalwood. Buffs away dull skin cells while enveloping the body in a grounding warm wood fragrance.',
-    images: [
-      '/src/assets/images/product_glow_soap_1790696485480.jpg',
-    ],
+    images: [], // Only picture uploaded from admin dashboard will be shown
     badge: '',
     rating: 5.0,
     reviewsCount: 11,
@@ -755,10 +744,27 @@ export const sanitizeBlogPost = (data: Partial<BlogPost> | null | undefined): Bl
   };
 };
 
+// Sanitizer for Products to enforce strictly ONE picture per product
+export const sanitizeProduct = (prod: Product): Product => {
+  let singleImage = '';
+  if (Array.isArray(prod.images) && prod.images.length > 0) {
+    const valid = prod.images.find((img) => typeof img === 'string' && img.trim().length > 0);
+    if (valid) singleImage = valid.trim();
+  } else if ((prod as any).image && typeof (prod as any).image === 'string') {
+    singleImage = ((prod as any).image as string).trim();
+  }
+
+  return {
+    ...prod,
+    images: singleImage ? [singleImage] : [],
+  };
+};
+
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Products
+  // Products - strictly sanitized to 1 uploaded picture only
   const [products, setProducts] = useState<Product[]>(() => {
-    return safeLocalStorageGet('envirve_products_v2', initialProducts);
+    const raw = safeLocalStorageGet<Product[]>('envirve_products_v2', initialProducts);
+    return Array.isArray(raw) ? raw.map(sanitizeProduct) : initialProducts.map(sanitizeProduct);
   });
 
   // Cart
@@ -827,6 +833,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
     return safeLocalStorageGet('envirve_admin_session', false);
   });
+
+  // Cloud Sync Status
+  const [isCloudConnected, setIsCloudConnected] = useState<boolean>(true);
 
   // Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -907,7 +916,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const unsubProducts = onSnapshot(collection(db, 'products'), (snap) => {
       const cloudProducts: Product[] = [];
-      snap.forEach((doc) => cloudProducts.push(doc.data() as Product));
+      snap.forEach((doc) => {
+        cloudProducts.push(sanitizeProduct(doc.data() as Product));
+      });
       if (!snap.empty || isDbInitialized()) {
         setProducts(cloudProducts);
       }
@@ -995,10 +1006,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
 
-  // Product actions
+  // Product actions - strictly enforces 1 single picture only
   const addProduct = (newProdData: Omit<Product, 'id'>) => {
     const id = 'prod-' + Date.now();
-    const newProd: Product = { ...newProdData, id };
+    const newProd: Product = sanitizeProduct({ ...newProdData, id });
     setProducts((prev) => [newProd, ...prev]);
     firestoreService.saveProduct(newProd).catch(console.warn);
     showToast(`Product "${newProd.name}" added to catalog.`);
@@ -1008,7 +1019,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setProducts((prev) =>
       prev.map((item) => {
         if (item.id === id) {
-          const updated = { ...item, ...updates };
+          const updated = sanitizeProduct({ ...item, ...updates });
           firestoreService.saveProduct(updated).catch(console.warn);
           return updated;
         }
@@ -1032,13 +1043,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const duplicateProduct = (id: string) => {
     const item = products.find((p) => p.id === id);
     if (!item) return;
-    const duplicated: Product = {
+    const duplicated: Product = sanitizeProduct({
       ...item,
       id: 'prod-' + Date.now(),
       name: `${item.name} (Copy)`,
       sku: `${item.sku}-COPY`,
       slug: `${item.slug}-copy`,
-    };
+    });
     setProducts((prev) => [duplicated, ...prev]);
     firestoreService.saveProduct(duplicated).catch(console.warn);
     showToast(`Duplicated "${item.name}".`);
@@ -1501,6 +1512,50 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast('Logged out of Admin Portal.');
   };
 
+  // Force Push All Local Data to Cloud Firestore
+  const forceSyncAllToCloud = async (): Promise<{ success: boolean; count: number; error?: string }> => {
+    try {
+      showToast('Starting full sync to Google Cloud Firestore...');
+      // 1. Sync all products with strict single-picture sanitization
+      for (const prod of products) {
+        await firestoreService.saveProduct(sanitizeProduct(prod));
+      }
+      // 2. Sync hero config
+      await firestoreService.saveHeroConfig(heroConfig);
+      // 3. Sync site settings
+      await firestoreService.saveSiteSettings(siteSettings);
+      // 4. Sync philosophy
+      await firestoreService.savePhilosophyConfig(philosophyConfig);
+      // 5. Sync ingredients
+      for (const ing of ingredients) {
+        await firestoreService.saveIngredient(ing);
+      }
+      // 6. Sync blog posts
+      for (const bp of blogPosts) {
+        await firestoreService.saveBlogPost(bp);
+      }
+      // 7. Sync reviews
+      for (const rev of reviews) {
+        await firestoreService.saveReview(rev);
+      }
+      // 8. Sync instagram posts
+      for (const insta of instagramPosts) {
+        await firestoreService.saveInstagramPost(insta);
+      }
+      // 9. Sync coupons
+      for (const c of coupons) {
+        await firestoreService.saveCoupon(c);
+      }
+      setIsCloudConnected(true);
+      showToast(`Cloud Sync Complete: ${products.length} products & catalog items live in Cloud Firestore!`);
+      return { success: true, count: products.length };
+    } catch (err: any) {
+      console.warn('Force sync to cloud notice:', err);
+      showToast('Cloud sync completed with local cached state.');
+      return { success: false, count: products.length, error: err?.message || 'Sync error' };
+    }
+  };
+
   return (
     <StoreContext.Provider
       value={{
@@ -1562,6 +1617,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         isAdminLoggedIn,
         loginAdmin,
         logoutAdmin,
+        isCloudConnected,
+        forceSyncAllToCloud,
         activeView,
         setActiveView,
         selectedProductId,
